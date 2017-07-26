@@ -13,9 +13,24 @@ from services.ads_api.errors import YaApiException, YaApiExceptions,\
 YaApiUnits = namedtuple("YaApiUnits", "spent remains total")
 
 
-units_regexp: ClassVar[Pattern] = re.compile(
+YaApiGetResponse = Tuple[
+    YaApiUnits,               # units spent for request/remained/total
+    List[Dict],               # result items
+    Optional[int],            # limited by (last item on page)
+    Optional[YaApiException]  # error that occurred
+]
+
+
+YaApiActionResponse = Tuple[
+    YaApiUnits,                 # units spent for request/remained/total
+    Optional[YaApiExceptions],  # errors that occurred
+    Optional[YaApiWarnings]     # warnings returned by request
+]
+
+
+units_regexp: Pattern = re.compile(
     "([0-9]+)/([0-9]+)/([0-9]+)"
-)
+)  # regexp for extracting units
 
 
 def ya_parse_units(text: str)-> YaApiUnits:
@@ -36,12 +51,13 @@ def ya_parse_units(text: str)-> YaApiUnits:
 def ya_api_request(service_url: str, method_name: str,
                    params: Dict)->Tuple[YaApiUnits, Dict]:
     """
-    :param service_url: url part of Yandex Direct API
-    service
-    :param method_name: Yandex Direct API method name 
-    :param params: Yandex Direct API request params payload
+    Lowest level Yandex Direct API request, just sends request and returns
+    raw content
+    :param service_url: url part of API service
+    :param method_name: API method name 
+    :param params: API request params payload
     :return: Units (spend for request/available/total) and
-    response payload
+    response payload (parsed json) 
     """
     url = "{}/{}".format(YA_DIRECT_URL, service_url)
     headers = {"Authorization": "Bearer {}".format(YA_DIRECT_TOKEN)}
@@ -52,3 +68,51 @@ def ya_api_request(service_url: str, method_name: str,
     response = post(url=url, headers=headers, json=data)
     units = ya_parse_units(response.headers["Units"])
     return units, json.loads(response.text)
+
+
+def ya_api_get_request(service_url: str, result_name: str,
+                       params: Dict)->YaApiGetResponse:
+    """
+    Low level Yandex Direct API request with 'get' method
+    :param service_url: url part of API service 
+    :param result_name: key in response dictionary that contains resulting
+    items
+    :param params: API request params payload
+    :return: Units (spend for request/available/total), 
+    resulting items, last item if other pages available, error
+    """
+    units, response = ya_api_request(service_url, 'get', params)
+
+    result = response["result"].get(result_name, [])\
+        if "result" in response else []
+
+    if "error" in response:
+        error = YaApiException(
+            "Yandex direct API error, code: {}, text: {}".format(
+                response["error"]["error_code"],
+                response["error"]["error_detail"]
+            )
+        )
+    else:
+        error = None
+    return units, result, response.get("LimitedBy", None), error
+
+
+def ya_api_action_request(service_url: str, method_name: str,
+                          params: Dict)->YaApiActionResponse:
+    """
+    Low level Yandex Direct API request for action methods: 
+    add, update, delete and other
+    :param service_url: url part of API service
+    :param method_name: API method name
+    :param params: API request params payload
+    :return: Units (spend for request/available/total), 
+    errors, warnings
+    """
+    units, response = ya_api_request(service_url, method_name, params)
+
+    result = response["result"]
+    errors = YaApiExceptions(result["Errors"]) if "Errors" in result else None
+    warnings = YaApiWarnings(result["Errors"]) if "Errors" in result else None
+
+    return units, errors, warnings
