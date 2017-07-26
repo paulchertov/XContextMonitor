@@ -21,6 +21,12 @@ YaApiGetResponse = Tuple[
 ]
 
 
+YaApiGetAllResponse = Tuple[
+    YaApiUnits,               # units spent for request/remained/total
+    List[Dict],               # result items
+    Optional[YaApiException]  # error that occurred
+]
+
 YaApiActionResponse = Tuple[
     YaApiUnits,                 # units spent for request/remained/total
     Optional[YaApiExceptions],  # errors that occurred
@@ -116,3 +122,40 @@ def ya_api_action_request(service_url: str, method_name: str,
     warnings = YaApiWarnings(result["Errors"]) if "Errors" in result else None
 
     return units, errors, warnings
+
+
+def ya_api_get_all(service_url: str, result_name: str,
+                   params: Dict)->YaApiGetAllResponse:
+    """
+    Low level bunch of Yandex Direct API requests with 'get' method
+    extracting all items. Sends multiple requests if response paged
+    :param service_url: url part of API service 
+    :param result_name: key in response dictionary that contains resulting
+    items
+    :param params: API request params payload
+    :return: Units (spend for request/available/total), 
+    resulting items, error 
+    """
+    units, items, limited, error = ya_api_get_request(
+        service_url, result_name, params
+    )
+    result = items
+    if error:
+        return units, items, error
+
+    if limited:
+        params = params.copy()
+
+    while limited:
+        params["Page"] = {
+            "Limit": 10_000,
+            "Offset": limited
+        }
+        units, items, limited, error = ya_api_get_request(
+            service_url, result_name, params
+        )
+        if error:
+            return units, items, error
+        result += items
+
+    return units, items, error
