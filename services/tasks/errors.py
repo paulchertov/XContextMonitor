@@ -50,3 +50,11 @@ class YaApiWarnings:
             self.message += template.format(
                 warning["Code"], warning["Message"], warning["Details"]
             )
+
+
+class YaApiNoUnits(YaApiException):
+    """
+    Exception raised then no API units left, so 
+    request cannot be sent
+    """
+    pass
