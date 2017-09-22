@@ -1,19 +1,27 @@
 from typing import List, Dict, Tuple
-from collections import namedtuple
 
 from PyQt5.QtCore import QThread, pyqtSignal
 
+from model.yandex_api_items import YaAPIDirectClient, YaAPIDirectCampaign,\
+    YaAPIDirectAdGroup, YaAPIDirectAd, YaAPIDirectLinksSet
 from services.tasks.yandex_utils import YaApiUnits, \
     ya_api_get_request, ya_api_get_all, ya_api_action_request
 from services.tasks.errors import YaApiException
 
 
-# TODO: Move to model
-YaAPIDirectClient = namedtuple("YaAPIDirectClient", "id login")
-YaAPIDirectCampaign = namedtuple("YaAPIDirectCampaign", "id name client_login")
-YaAPIDirectAdGroup = namedtuple("YaAPIDirectAdGroup", "id name campaign_id")
-YaAPIDirectAd = namedtuple("YaAPIDirectAd", "id group_id url links_set")
-YaAPIDirectLinkSet = namedtuple("YaAPIDirectLinkSe", "id links")
+def split_by_n(items: List, n: int)->List[List]:
+    """
+    splits list to lists no more than n items length
+    :param items: list to be splitted
+    :param n: maximum length of sublist
+    :return: sublists of n or less length
+    """
+    item_packs = []
+    while len(items) > n:
+        item_packs.append(items[:n])
+        items = items[n:]
+    item_packs.append(items)
+    return item_packs
 
 
 class GetDirectClients(QThread):
@@ -38,10 +46,8 @@ class GetDirectClients(QThread):
     def run(self):
         try:
             params = {
-                # ignoring archived clients
                 "SelectionCriteria": {"Archived": "NO"},
-                # getting only id and logins
-                "FieldNames": ["ClientId", "Login"]
+                "FieldNames": ["Login"]
             }
             units, clients, _, err = ya_api_get_request(
                 "agencyclients", "Clients", params, self.token
@@ -51,13 +57,8 @@ class GetDirectClients(QThread):
 
             if err:
                 self.error_occurred.emit(err)
-
+            clients = YaAPIDirectClient.from_api_answer(self.token, clients)
             if clients:
-                clients = [
-                    YaAPIDirectClient(id=client["ClientId"],
-                                      login=client["Login"])
-                    for client in clients
-                ]
                 self.got_clients.emit(clients)
         except Exception as e:
             self.error_occurred.emit(e)
@@ -88,13 +89,9 @@ class GetDirectCampaigns(QThread):
             params = {
                 "SelectionCriteria":
                     {
-                        # only text campaigns
-                        "Types":
-                            ["TEXT_CAMPAIGN"],
-                        # all Types except archived
+                        "Types": ["TEXT_CAMPAIGN"],
                         "States":
                             ["CONVERTED", "ENDED", "OFF", "ON", "SUSPENDED"],
-                        # all Statuses except archived
                         "Statuses":
                             ["ACCEPTED", "DRAFT", "MODERATION", "REJECTED"],
                     },
@@ -106,16 +103,8 @@ class GetDirectCampaigns(QThread):
             if units:
                 self.got_units.emit(units)
 
-            # TODO: move to models method
+            campaigns = YaAPIDirectCampaign.from_api_answer(login, campaigns)
             if campaigns:
-                campaigns = [
-                    YaAPIDirectCampaign(
-                        id=campaign["Id"],
-                        name=campaign["Name"],
-                        client_login=login
-                    )
-                    for campaign in campaigns
-                ]
                 self.got_campaigns.emit(campaigns)
 
             if err:
@@ -150,21 +139,14 @@ class GetDirectAdGroups(QThread):
     def run(self):
         try:
             for (login, token), campaigns in self.data.items():
-                campaigns_packs = []
                 # api can not return more than 10 campaigns per call
-                # TODO: move to separate function
-                while len(campaigns) > 10:
-                    campaigns_packs.append(campaigns[:10])
-                    campaigns = campaigns[10:]
-                campaigns_packs.append(campaigns)
+                campaigns_packs = split_by_n(campaigns, 10)
 
                 for campaigns_pack in campaigns_packs:
                     params = {
                         "SelectionCriteria":
                             {
-                                # only for provided campaigns
                                 "CampaignIds": campaigns_pack,
-                                # only text ads
                                 "Types": ["TEXT_AD_GROUP"]
                             },
                         "FieldNames": ["Id", "Name", "CampaignId", "Type"]
@@ -175,16 +157,8 @@ class GetDirectAdGroups(QThread):
                     if units:
                         self.got_units.emit(units)
 
-                    # TODO: move to models method
+                    ad_groups = YaAPIDirectAdGroup.from_api_answer(ad_groups)
                     if ad_groups:
-                        ad_groups = [
-                            YaAPIDirectAdGroup(
-                                id=ad_group["Id"],
-                                name=ad_group["Name"],
-                                campaign_id=ad_group["CampaignId"]
-                            )
-                            for ad_group in ad_groups
-                        ]
                         self.got_ad_groups.emit(ad_groups)
 
                     if err:
@@ -222,43 +196,26 @@ class GetDirectAds(QThread):
 
     def run(self):
         try:
-            for login, campaigns in self.data.items():
-                campaigns_packs = []
-                # TODO: move to separate function
+            for (login, token), campaigns in self.data.items():
+                campaigns_packs = split_by_n(campaigns, 10)
                 # api can not return more than 10 campaigns per call
-                while len(campaigns) > 10:
-                    campaigns_packs.append(campaigns[:10])
-                    campaigns = campaigns[10:]
-                campaigns_packs.append(campaigns)
+
                 for campaigns_pack in campaigns_packs:
                     params = {
-                        "SelectionCriteria":
-                            {
-                                "CampaignIds": campaigns_pack
-                            },
+                        "SelectionCriteria": {"CampaignIds": campaigns_pack},
                         "FieldNames": ["Id", "CampaignId", "AdGroupId"],
                         "TextAdFieldNames": ["Href", "SitelinkSetId"]
                     }
                     units, ads, err = ya_api_get_all(
-                        "ads", "Ads", params, login[1], login[0]
+                        "ads", "Ads", params, token, login
                     )
+
                     if units:
                         self.got_units.emit(units)
 
-                    # TODO: move to models method
+                    ads = YaAPIDirectAd.from_api_answer(ads)
                     if ads:
-                        ads = [
-                            YaAPIDirectAd(
-                                id=ad["Id"],
-                                group_id=ad["AdGroupId"],
-                                links_set=ad["TextAd"].get("SitelinkSetId", None)
-                                if "TextAd" in ad else None,
-                                url=ad["TextAd"].get("Href", None)
-                                if "TextAd" in ad else None
-                            )
-                            for ad in ads
-                        ]
-                        self.got_ads.emit(login[0], ads)
+                        self.got_ads.emit(login, ads)
 
                     if err:
                         self.error_occurred.emit(err)
@@ -285,46 +242,33 @@ class GetDirectLinks(QThread):
     error_occurred = pyqtSignal(Exception)
 
     def __init__(self, data: Dict[Tuple[str, str], List[int]]):
+        """
+        :param data: dictionary with 
+            keys: tuple of (login, token)
+            values: links sets ids lists
+        """
         super().__init__()
         self.data: Dict[Tuple[str, str], List[int]] = data
 
     def run(self):
         try:
             for (login, token), links_sets in self.data.items():
-                links_sets_packs = []
-                # TODO: move to separate function
                 # no more than 10 000 linksets can be returned per call
-                while len(links_sets) > 10_000:
-                    links_sets_packs.append(links_sets[:10_000])
-                    links_sets = links_sets[10_000:]
-                links_sets_packs.append(links_sets)
+                links_sets_packs = split_by_n(links_sets, 10_000)
 
                 for links_sets_pack in links_sets_packs:
                     params = {
-                        "SelectionCriteria":
-                            {
-                                "Ids": links_sets_pack
-                            },
+                        "SelectionCriteria": {"Ids": links_sets_pack},
                         "FieldNames": ["Id", "Sitelinks"]
                     }
                     units, sets, err = ya_api_get_all(
-                        "sitelinks", "SitelinksSets", params, login[1], login[0]
+                        "sitelinks", "SitelinksSets", params, token, login
                     )
                     if units:
                         self.got_units.emit(units)
 
-                    # TODO: move to models method
+                    sets = YaAPIDirectLinksSet.from_api_answer(sets)
                     if sets:
-                        sets = [
-                            YaAPIDirectLinkSet(
-                                id=links_set["Id"],
-                                links=[
-                                    link["Href"] for link in links_set["Sitelinks"]
-                                    if "Href" in link
-                                ] if "Sitelinks" in links_set else []
-                            )
-                            for links_set in sets
-                        ]
                         self.got_links.emit(sets)
 
                     if err:
