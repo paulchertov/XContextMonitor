@@ -2,11 +2,11 @@ from typing import List, Dict, Tuple
 
 from PyQt5.QtCore import QThread, pyqtSignal
 
-from model.yandex_api_items import YaAPIDirectClient, YaAPIDirectCampaign,\
+from model.api_items.yandex import YaAPIDirectClient, YaAPIDirectCampaign, \
     YaAPIDirectAdGroup, YaAPIDirectAd, YaAPIDirectLinksSet
-from services.tasks.yandex_utils import YaApiUnits, \
-    ya_api_get_request, ya_api_get_all, ya_api_action_request
 from services.tasks.errors import YaApiException
+from services.tasks.yandex_utils import YaApiUnits, \
+    ya_api_get_request, ya_api_get_all
 
 
 def split_by_n(items: List, n: int)->List[List]:
