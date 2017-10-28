@@ -1,3 +1,11 @@
+"""
+SQLAlchemy model for client items for Yandex and Googl API
+Classes:
+    YandexClient - model for client got from Yandex API
+    GoogleClient - model for client got from Yandex API
+"""
+
+
 import sys
 import json
 import math
@@ -10,8 +18,22 @@ from sqlalchemy.orm import relationship
 from model.alchemy.common import Base
 
 
-
 class YandexClient(Base):
+    """
+    ORM model for client got from Yandex API, represents db table ya_clients
+    Class fields:
+    file_path - path of json file where all options between sessions are stored
+    Class methods:
+        load_json - loads data from json file and saves them to db
+    
+    
+    properties:
+        login - login of client in Yandex Direcr
+        token - token to get access to that client from Yandex API
+        timestamp - timestap of last update from API
+        set_active - is item was set active on the last session in GUI
+        campaigns - all campaigns that belong to this client
+    """
     __tablename__ = "ya_clients"
     login = Column(String)
     token = Column(String)
@@ -25,6 +47,7 @@ class YandexClient(Base):
 
     @classmethod
     def load_json(cls, session):
+
         if not path.isfile(cls.file_path):
             return
         with open(cls.file_path, "r") as file:

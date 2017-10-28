@@ -2,16 +2,17 @@
 Module with Yandex API items wrappers - items for transporting data 
 between Yandex API tasks and main thread and between main thread and
 database thread and for using as model for view (gui)
-
-YaAPIDirectClient - wrapper for client
-YaAPIDirectCampaign - wrapper for campaign
-YaAPIDirectAdGroup - wrapper for group of ads
-YaAPIDirectAd - wrapper for ad
-YaAPIDirectLinksSet - wrapper for set of links
+Classes:
+    YaAPIDirectClient - wrapper for client
+    YaAPIDirectCampaign - wrapper for campaign
+    YaAPIDirectAdGroup - wrapper for group of ads
+    YaAPIDirectAd - wrapper for ad
+    YaAPIDirectLinksSet - wrapper for set of links
 """
 
 
 from typing import Optional, List
+from datetime import datetime
 
 
 class YaAPIDirectClient:
@@ -23,13 +24,18 @@ class YaAPIDirectClient:
     classmethods:
         from_api_answer - create bunch of items from API answer
     """
-    def __init__(self, login: str, token: str):
+    def __init__(self, login: str, token: str,
+                 timestamp: datetime, is_active: bool):
         """
         :param token: token of Yandex API
         :param login: client login
+        :param timestamp: datetime when data was obtained from API
+        :param is_active: is item was set active on the last session in GUI
         """
         self.token = token
         self.login = login
+        self.timestamp = timestamp
+        self.is_active = is_active
 
     @classmethod
     def from_api_answer(cls, token: str, clients: Optional[List])-> List:
@@ -42,7 +48,9 @@ class YaAPIDirectClient:
         if clients:
             return [
                 cls(token=token,
-                    login=client["Login"])
+                    login=client["Login"],
+                    timestamp=datetime.now(),
+                    is_active=False)
                 for client in clients
             ]
         return []
