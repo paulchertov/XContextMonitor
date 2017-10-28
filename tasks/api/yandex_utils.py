@@ -1,3 +1,11 @@
+"""
+Low level Yandex Direct API functions
+Data-wrappers (just data definition):
+    YaApiUnits - units after request as spent/remains/total
+    YaApiGetResponse - response of get request
+    YaApiGetAllResponse
+"""
+
 import json
 import re
 from typing import Pattern, List, Dict, Tuple, Optional, ClassVar
@@ -6,7 +14,7 @@ from collections import namedtuple
 from requests import post
 
 from settings.config import YA_DIRECT_URL
-from services.tasks.yandex_api.errors import YaApiException, YaApiExceptions,\
+from tasks.api.errors import YaApiException, YaApiExceptions,\
     YaApiWarnings
 
 

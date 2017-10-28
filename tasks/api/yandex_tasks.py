@@ -1,17 +1,29 @@
+"""
+Tasks (QT Threads) that work with Yandex API
+Classes:
+GetDirectClients - Yandex API request that gets all agency clients
+GetDirectCampaigns - Yandex API request that gets all campaigns of
+target client
+GetDirectAdGroups - Yandex API request that gets all by provided
+logins
+GetDirectAds - 
+"""
+
 from typing import List, Dict, Tuple
 
 from PyQt5.QtCore import QThread, pyqtSignal
 
 from model.api_items.yandex import YaAPIDirectClient, YaAPIDirectCampaign, \
     YaAPIDirectAdGroup, YaAPIDirectAd, YaAPIDirectLinksSet
-from services.tasks.errors import YaApiException
-from services.tasks.yandex_utils import YaApiUnits, \
+from tasks.api.errors import YaApiException
+from tasks.api.yandex_utils import YaApiUnits, \
     ya_api_get_request, ya_api_get_all
 
 
 def split_by_n(items: List, n: int)->List[List]:
     """
-    splits list to lists no more than n items length
+    function for internal use that
+    splits list to lists with no more than n items length
     :param items: list to be splitted
     :param n: maximum length of sublist
     :return: sublists of n or less length
@@ -26,7 +38,8 @@ def split_by_n(items: List, n: int)->List[List]:
 
 class GetDirectClients(QThread):
     """
-    Cmd call that gets all agency clients from Yandex Direct API
+    Yandex API request that gets all agency 
+    clients from Yandex Direct API
     And emits:
     Remained Yandex API units
     Clients if everything is ok
@@ -66,7 +79,7 @@ class GetDirectClients(QThread):
 
 class GetDirectCampaigns(QThread):
     """
-    Cmd call that gets all campaigns of target client 
+    Yandex API request that gets all campaigns of target client 
     from Yandex Direct API
     And emits:
     Remained Yandex API units
@@ -114,7 +127,7 @@ class GetDirectCampaigns(QThread):
 
 class GetDirectAdGroups(QThread):
     """
-    Cmd call that gets all ad groups by login and
+    Yandex API request that gets all ad groups by login and
     token from Yandex Direct API
     And emits:
     Remained Yandex API units
@@ -172,7 +185,7 @@ class GetDirectAdGroups(QThread):
 
 class GetDirectAds(QThread):
     """
-    Cmd call that gets all ads by login and token 
+    Yandex API request that gets all ads by login and token 
     from Yandex Direct API
     And emits:
     Remained Yandex API units
@@ -228,7 +241,7 @@ class GetDirectAds(QThread):
 
 class GetDirectLinks(QThread):
     """
-    Cmd call that gets all links grouped by 
+    Yandex API request call that gets all links grouped by 
     login and token from Yandex Direct API
     And emits:
     Remained Yandex API units
