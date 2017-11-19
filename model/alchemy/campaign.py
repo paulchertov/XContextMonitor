@@ -56,3 +56,22 @@ class YandexCampaign(Base):
             else:
                 campaigns_by_login[key] = [campaign.id]
         return campaigns_by_login
+
+    @classmethod
+    def update_from_api(cls, session, campaigns):
+        """
+        Parses provided Yandex API campaigns response and saves all
+        campaigns to db
+        :param session: SQLAlchemy session
+        :return: None
+        """
+        db_campaigns = [
+            YandexCampaign(
+                id=campaign.id,
+                name=campaign.name,
+                client_login=campaign.client_login
+            )
+            for campaign in campaigns
+        ]
+        session.bulk_save_objects(db_campaigns)
+        session.commit()
