@@ -1,5 +1,5 @@
 """
-Module with Yandex API items wrappers - items for transporting data 
+Module with Yandex API items wrappers - ViewModels for transporting data 
 between Yandex API tasks and main thread and between main thread and
 database thread and for using as model for view (gui)
 Classes:

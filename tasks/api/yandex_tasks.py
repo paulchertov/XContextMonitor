@@ -1,12 +1,13 @@
 """
 Tasks (QT Threads) that work with Yandex API
 Classes:
-GetDirectClients - Yandex API request that gets all agency clients
-GetDirectCampaigns - Yandex API request that gets all campaigns of
-target client
-GetDirectAdGroups - Yandex API request that gets all by provided
-logins
-GetDirectAds - 
+    GetDirectClients - Yandex API request that gets all agency clients
+    GetDirectCampaigns - Yandex API request that gets all campaigns for
+    each (login, token) pairs
+    GetDirectAdGroups - Yandex API request that gets all by provided
+    (login, token) pairs
+    GetDirectAds - Yandex API request that gets all by provided
+    (login, token) pairs
 """
 
 from typing import List, Dict, Tuple

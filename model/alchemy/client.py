@@ -1,18 +1,17 @@
 """
-SQLAlchemy model for client items for Yandex and Googl API
+SQLAlchemy model for client items for Yandex and Google API
 Classes:
     YandexClient - model for client got from Yandex API
-    GoogleClient - model for client got from Yandex API
+    GoogleClient - model for client got from Google API
 """
 
 
-import sys
 import json
 import math
-from datetime import datetime, timezone
+from datetime import datetime
 from os import path
 
-from sqlalchemy import Column, Integer, String, DateTime, Boolean
+from sqlalchemy import Column, String, DateTime, Boolean
 from sqlalchemy.orm import relationship
 
 from model.alchemy.common import Base
@@ -47,7 +46,11 @@ class YandexClient(Base):
 
     @classmethod
     def load_json(cls, session):
-
+        """
+        Loads all saved clients from json and saves them to db
+        :param session: SQLAlchemy session
+        :return: None
+        """
         if not path.isfile(cls.file_path):
             return
         with open(cls.file_path, "r") as file:
@@ -64,6 +67,11 @@ class YandexClient(Base):
 
     @classmethod
     def save_json(cls, session):
+        """
+        Saves all clients from db to json file
+        :param session: SQLAlchemy session
+        :return: None
+        """
         data = [
             {
                 "login": client.login,
@@ -78,6 +86,12 @@ class YandexClient(Base):
 
     @classmethod
     def update_from_api(cls, session, clients):
+        """
+        Parses provided Yandex API clients response and saves all
+        clients to db
+        :param session: SQLAlchemy session
+        :return: None
+        """
         persisted_clients_logins = {
             login for login in session.query(YandexClient.login).all()
         }
@@ -100,6 +114,12 @@ class YandexClient(Base):
 
     @classmethod
     def add_single(cls, session, item):
+        """
+        Saves API wrapper item to db
+        :param session: SQLAlchemy session
+        :param item: YaAPIDirectClient to save
+        :return: created YandexClient 
+        """
         session.add(YandexClient(login=item.login, token=item.token))
         session.commit()
         return session.query(YandexClient).get(item.login)

@@ -1,6 +1,6 @@
 """
-Gui wrapper for client (Yandex or Google)
-contains single class PQClientMdel
+ViewModel for client (Yandex or Google)
+contains single class PQClientModel
 """
 
 from datetime import datetime
@@ -13,7 +13,7 @@ from model.alchemy.client import YandexClient
 
 class PQClientModel(QObject):
     """
-    GUI wrapper for API client item (Google or Yandex)
+    ViewModel for API client item (Google or Yandex)
     properties:
         login: campaign login
         timestamp: datetime of last update from API

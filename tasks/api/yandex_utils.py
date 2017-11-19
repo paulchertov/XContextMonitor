@@ -4,6 +4,15 @@ Data-wrappers (just data definition):
     YaApiUnits - units after request as spent/remains/total
     YaApiGetResponse - response of get request
     YaApiGetAllResponse
+functions:
+    ya_parse_units - Parses Api units from their string representation
+    to YaApiUnits
+    ya_api_request - sends request and returns
+    raw content
+    ya_api_get_request - request with 'get' method
+    ya_api_action_request - request for action methods: 
+    add, update, delete and other
+    ya_api_get_all - calls ya_api_request until gets all items
 """
 
 import json

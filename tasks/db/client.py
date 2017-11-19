@@ -1,8 +1,13 @@
 """
-Module with DB tasks for working with clients table
+Module with DB tasks for working with clients tables
 in db
 Classes:
-
+    LoadClients - updates db with all clients, saved to json
+    and then gets all clients from db
+    GetClients - updates db with all clients, saved to json
+    and then gets all clients from db
+    AddClient - adds one client
+    and then gets all clients from db
 """
 
 from typing import List
@@ -35,6 +40,7 @@ class LoadClients(PQDBTask):
     """
     DB Task that updates db with all clients, saved to json
     and then gets all clients from db
+    :emits got_clients: - list of YaAPIDirectClient
     """
     got_clients = pyqtSignal(list)
 
@@ -50,6 +56,7 @@ class GetClients(PQDBTask):
     """
     DB task that gets all clients from DB 
     and then gets all clients from db
+    :emits got_clients: - list of YaAPIDirectClient
     """
     got_clients = pyqtSignal(list)
 
@@ -64,6 +71,7 @@ class AddClient(PQDBTask):
     """
     DB task that adds one client
     and then gets all clients from db
+    :emits got_clients: - list of YaAPIDirectClient
     """
     got_clients = pyqtSignal(list)
 
