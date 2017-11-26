@@ -146,6 +146,17 @@ class YaAPIDirectAdGroup:
             ]
         return []
 
+    @classmethod
+    def from_db_items(cls, db_groups):
+        return [
+            YaAPIDirectAdGroup(
+                id=db_group.id,
+                name=db_group.name,
+                campaign_id=db_group.campaign_id
+            )
+            for db_group in db_groups
+        ]
+
 
 class YaAPIDirectAd:
     """

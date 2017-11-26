@@ -21,7 +21,7 @@ def all_ad_groups(session)->List[YaAPIDirectAdGroup]:
     :param session: db session
     :return: list of all ad groups in db
     """
-    return session.query(YandexAdGroup).all()
+    return YaAPIDirectAdGroup.from_db_items(session.query(YandexAdGroup).all())
 
 
 class SaveAdGroupsFromAPI(PQDBTask):
