@@ -8,7 +8,7 @@ from typing import Union
 
 from PyQt5.QtCore import QObject, pyqtSignal
 
-from model.alchemy.client import YandexClient
+from model.api_items.yandex import YaAPIDirectClient
 
 
 class PQClientModel(QObject):
@@ -24,43 +24,43 @@ class PQClientModel(QObject):
     """
     updated = pyqtSignal()
 
-    def __init__(self, model: Union[YandexClient, None]):
+    def __init__(self, model: Union[YaAPIDirectClient, None]):
         """
-        :param model: YandexClient or GoogleClient(not implemented yet)
+        :param model: YaAPIDirectClient or GoogleAPIAdwordsClient(not implemented yet)
         """
         super().__init__()
-        self.persistent: Union[YandexClient, None] = model
+        self.model: Union[YaAPIDirectClient, None] = model
 
     @property
     def source(self)->str:
-        if isinstance(self.persistent, YandexClient):
+        if isinstance(self.model, YaAPIDirectClient):
             return "Yandex Direct"
         else:
             return ""
 
     @property
     def login(self)->str:
-        return self.persistent.login
+        return self.model.login
 
     @login.setter
     def login(self, val: str):
-        self.persistent.login = val
+        self.model.login = val
         self.updated.emit()
 
     @property
     def timestamp(self)->datetime:
-        return self.persistent.timestamp
+        return self.model.timestamp
 
     @timestamp.setter
     def timestamp(self, val: datetime):
-        self.persistent.timestamp = val
+        self.model.timestamp = val
         self.updated.emit()
 
     @property
-    def set_active(self)->bool:
-        return self.persistent.set_active
+    def is_active(self)->bool:
+        return self.model.is_active
 
-    @set_active.setter
-    def set_active(self, val: bool):
-        self.persistent.set_active = val
+    @is_active.setter
+    def is_active(self, val: bool):
+        self.model.is_active = val
         self.updated.emit()
