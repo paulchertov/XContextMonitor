@@ -10,6 +10,7 @@ import json
 import math
 from datetime import datetime
 from os import path
+from typing import List
 
 from sqlalchemy import Column, String, DateTime, Boolean
 from sqlalchemy.orm import relationship
@@ -24,8 +25,11 @@ class YandexClient(Base):
     file_path - path of json file where all options between sessions are stored
     Class methods:
         load_json - loads data from json file and saves them to db
-    
-    
+        save_json - saves all clients from db to json file
+        update_from_api - parses provided Yandex API clients response and 
+        saves all clients to db
+        add_single - saves API wrapper item to db
+        
     properties:
         login - login of client in Yandex Direcr
         token - token to get access to that client from Yandex API
@@ -85,10 +89,11 @@ class YandexClient(Base):
             json.dump(data, file)
 
     @classmethod
-    def update_from_api(cls, session, clients):
+    def update_from_api(cls, session, clients: List):
         """
         Parses provided Yandex API clients response and saves all
         clients to db
+        :param clients: list of clients from Yandex API
         :param session: SQLAlchemy session
         :return: None
         """

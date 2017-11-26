@@ -2,6 +2,8 @@
 Module with DB tasks for working with clients tables
 in db
 Classes:
+    SaveClientsFromAPI - updates db with all clients from 
+    provided YaAPIDirectClient list
     LoadClients - updates db with all clients, saved to json
     and then gets all clients from db
     GetClients - updates db with all clients, saved to json
@@ -25,15 +27,29 @@ def all_clients(session)->List[YaAPIDirectClient]:
     :param session: db session
     :return: list of all clients in db
     """
-    return [
-        YaAPIDirectClient(
-            login=client.login,
-            token=client.token,
-            timestamp=client.timestamp,
-            is_active=client.set_active
-        )
-        for client in session.query(YandexClient).all()
-    ]
+    return YaAPIDirectClient.from_db_items(
+        session.query(YandexClient).all()
+    )
+
+
+class SaveClientsFromAPI(PQDBTask):
+    """
+    DB Task that updates db with all clients from 
+    provided YaAPIDirectClient list
+    """
+
+    def __init__(self, clients: List[YaAPIDirectClient]):
+        super().__init__()
+        self.clients = clients
+
+    def run(self):
+        try:
+            YandexClient.update_from_api(
+                self.session,
+                self.clients
+            )
+        except Exception as e:
+            self.error_occurred.emit(e)
 
 
 class LoadClients(PQDBTask):
@@ -55,7 +71,6 @@ class LoadClients(PQDBTask):
 class GetClients(PQDBTask):
     """
     DB task that gets all clients from DB 
-    and then gets all clients from db
     :emits got_clients: - list of YaAPIDirectClient
     """
     got_clients = pyqtSignal(list)

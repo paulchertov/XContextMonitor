@@ -55,6 +55,18 @@ class YaAPIDirectClient:
             ]
         return []
 
+    @classmethod
+    def from_db_items(cls, db_clients):
+        return [
+            YaAPIDirectClient(
+                login=db_client.login,
+                token=db_client.token,
+                timestamp=db_client.timestamp,
+                is_active=db_client.set_active
+            )
+            for db_client in db_clients
+        ]
+
 
 class YaAPIDirectCampaign:
     """
@@ -128,8 +140,7 @@ class YaAPIDirectAdGroup:
                 YaAPIDirectAdGroup(
                     id=ad_group["Id"],
                     name=ad_group["Name"],
-                    campaign_id=ad_group["Cam"
-                                         "paignId"]
+                    campaign_id=ad_group["CampaignId"]
                 )
                 for ad_group in ad_groups
             ]
