@@ -26,6 +26,9 @@ GroupedCampaigns = Dict[LoginTokenPair, CampaignsList]
 class YandexCampaign(Base):
     """
     DB model for Yandex API campaign
+    Class methods:
+        update_from_api - gets data from API answer and saves to db
+        by_login_and_token - gets campaigns grouped by (login, token) pairs
     """
     __tablename__ = "ya_campaigns"
     id = Column(Integer, primary_key=True)
@@ -58,10 +61,11 @@ class YandexCampaign(Base):
         return campaigns_by_login
 
     @classmethod
-    def update_from_api(cls, session, campaigns):
+    def update_from_api(cls, session, campaigns: List):
         """
-        Parses provided Yandex API campaigns response and saves all
+        Parses provided Yandex API campaigns items and saves all
         campaigns to db
+        :param campaigns: List of YaAPIDirectCampaign items
         :param session: SQLAlchemy session
         :return: None
         """
