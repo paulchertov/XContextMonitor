@@ -38,7 +38,7 @@ class SaveAdGroupsFromAPI(PQDBTask):
         try:
             YandexAdGroup.update_from_api(
                 self.session,
-                self.clients
+                self.ad_groups
             )
         except Exception as e:
             self.error_occurred.emit(e)
@@ -58,5 +58,3 @@ class GetAllAdGroups(PQDBTask):
             )
         except Exception as e:
             self.error_occurred.emit(e)
-
-
