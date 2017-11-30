@@ -44,3 +44,4 @@ class YandexAd(Base):
         ]
         session.bulk_save_objects(db_ads)
         session.commit()
+

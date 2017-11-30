@@ -38,7 +38,7 @@ class YandexClient(Base):
         campaigns - all campaigns that belong to this client
     """
     __tablename__ = "ya_clients"
-    login = Column(String)
+    login = Column(String, primary_key=True)
     token = Column(String)
     timestamp = Column(DateTime, default=datetime.now)
     set_active = Column(Boolean)

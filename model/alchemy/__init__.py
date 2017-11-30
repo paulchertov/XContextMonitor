@@ -7,3 +7,4 @@ modules:
     ad_group: db objects for yandex and google api ad groups
     ad: db objects for yandex and google api ads
 """
+

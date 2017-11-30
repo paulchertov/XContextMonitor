@@ -6,7 +6,7 @@ Classes:
     YandexLink -  model for link from link set from Yandex API
     LinkUrl - model for link checked by crawler
 """
-from typing import List
+from typing import List, Dict
 
 from sqlalchemy import Column, Integer, String, ForeignKey, Sequence
 from sqlalchemy.orm import relationship
@@ -69,6 +69,13 @@ class YandexLink(Base):
 
     @classmethod
     def update_from_api(cls, session, links_sets: List):
+        """
+        Saves all links from provided YaAPIDirectLinksSet list
+        to database
+        :param session: SQLAlchemy session 
+        :param links_sets: List of YaAPILinksSets
+        :return: None
+        """
         db_links = [
             YandexLink(url=link, set_id=links_set.id)
             for links_set in links_sets
@@ -82,12 +89,45 @@ class LinkUrl(Base):
     """
     DB model for parsed link
     Class methods:
-        aggregate_links - maps all 
+        aggregate_links - maps all links by some criteria
+        by_logins - gets all links grouped by login
     """
     __tablename__ = "link_urls"
     url = Column(String, primary_key=True)
     status = Column(String)
     warning_text = Column(String)
+
+    @classmethod
+    def by_logins(cls, session)->Dict[str, List[str]]:
+        """
+        Return all possible links grouped by client login
+        :param session: SQLAlchemy session
+        :return: dictionary with 
+            keys - logins
+            values - lists of links
+        """
+        main_links_query = session \
+            .query(YandexAd.url, YandexCampaign.client_login) \
+            .join(YandexAdGroup) \
+            .join(YandexCampaign)
+        additional_links_query = session \
+            .query(YandexLink.url, YandexCampaign.client_login) \
+            .join(YandexLinksSet) \
+            .join(YandexAd) \
+            .join(YandexAdGroup) \
+            .join(YandexCampaign)
+        links_query = main_links_query.union(additional_links_query)
+        links_by_logins = {}
+        all_links = []
+
+        for link, login in links_query.all():
+            if not link in all_links:
+                all_links.append(link)
+                if login in links_by_logins:
+                    links_by_logins[login].append(link)
+                else:
+                    links_by_logins[login] = [link]
+        return links_by_logins
 
     @classmethod
     def aggregate_links(cls, session, criteria)-> List[ParsedLink]:
