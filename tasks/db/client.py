@@ -4,6 +4,7 @@ in db
 Classes:
     SaveClientsFromAPI - updates db with all clients from 
     provided YaAPIDirectClient list
+    SaveAllClientsToJSON - saves db clients to JSON
     LoadClients - updates db with all clients, saved to json
     and then gets all clients from db
     GetClients - updates db with all clients, saved to json
@@ -48,6 +49,7 @@ class SaveClientsFromAPI(PQDBTask):
                 self.session,
                 self.clients
             )
+            self.finished.emit()
         except Exception as e:
             self.error_occurred.emit(e)
 
@@ -64,6 +66,18 @@ class LoadClients(PQDBTask):
         try:
             YandexClient.load_json(self.session)
             self.got_clients.emit(all_clients(self.session))
+        except Exception as e:
+            self.error_occurred.emit(e)
+
+
+class SaveAllClientsToJSON(PQDBTask):
+    """
+    DB Task that saves all db clients to JSON
+    """
+
+    def run(self):
+        try:
+            YandexClient.save_json(self.session)
         except Exception as e:
             self.error_occurred.emit(e)
 
