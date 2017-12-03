@@ -56,7 +56,12 @@ class YaAPIDirectClient:
         return []
 
     @classmethod
-    def from_db_items(cls, db_clients):
+    def from_db_items(cls, db_clients)->List:
+        """
+        Creates multiple clients items from db query result
+        :param db_clients: result of SQLAlchemy query
+        :return: List of YaAPIDirectClients
+        """
         return [
             YaAPIDirectClient(
                 login=db_client.login,
@@ -107,6 +112,22 @@ class YaAPIDirectCampaign:
             ]
         return []
 
+    @classmethod
+    def from_db_items(cls, db_campaigns):
+        """
+        Creates multiple campaigns items from db query result
+        :param db_campaigns: result of SQLAlchemy query 
+        :return: List of YaAPIDirectCampaigns
+        """
+        return [
+            YaAPIDirectCampaign(
+                id=db_campaign.id,
+                name=db_campaign.name,
+                client_login=db_campaign.client_login
+            )
+            for db_campaign in db_campaigns
+        ]
+
 
 class YaAPIDirectAdGroup:
     """
@@ -148,6 +169,11 @@ class YaAPIDirectAdGroup:
 
     @classmethod
     def from_db_items(cls, db_groups):
+        """
+        Creates multiple ad group items from db query result
+        :param db_groups: result of SQLAlchemy query 
+        :return: List of YaAPIDirectAdGroup
+        """
         return [
             YaAPIDirectAdGroup(
                 id=db_group.id,
@@ -184,7 +210,7 @@ class YaAPIDirectAd:
     @classmethod
     def from_api_answer(cls, ads)-> List:
         """
-        Creates multiple ads from API answer list
+        Creates multiple ad items from API answer list
         :param ads: list of properties returned from Yandex API
         :return: List of YaAPIDirectAds
         """
@@ -201,6 +227,23 @@ class YaAPIDirectAd:
                 for ad in ads
             ]
         return []
+
+    @classmethod
+    def from_db_items(cls, db_ads):
+        """
+        Creates multiple ad items from db query result
+        :param db_ads: result of SQLAlchemy query 
+        :return: List of YaAPIDirectAds
+        """
+        return [
+            YaAPIDirectAd(
+                id=db_ad.id,
+                group_id=db_ad.group_id,
+                links_set=db_ad.links_set_id,
+                url=db_ad.url
+            )
+            for db_ad in db_ads
+        ]
 
 
 class YaAPIDirectLinksSet:
@@ -239,3 +282,18 @@ class YaAPIDirectLinksSet:
                 for links_set in sets
             ]
         return []
+
+    @classmethod
+    def from_db_items(cls, db_sets):
+        """
+        Creates multiple links set items from db query result
+        :param db_sets: result of SQLAlchemy query 
+        :return: List of YaAPIDirectLinksSets
+        """
+        return [
+            YaAPIDirectLinksSet(
+                id=db_set.id,
+                links=[link.url for link in db_set.links]
+            )
+            for db_set in db_sets
+        ]
