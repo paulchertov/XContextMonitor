@@ -106,3 +106,4 @@ ENV/
 #private data
 
 settings/config.py
+settings/clients.json
