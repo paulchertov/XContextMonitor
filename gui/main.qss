@@ -1,0 +1,17 @@
+QWidget{}
+QPushButton{
+    border: 1px solid;
+    padding: 10px;
+    border-radius: 10px;
+}
+QProgressBar{
+    border: 2px inset;
+    max-height: 50px;
+    margin: 100px auto 100px auto;
+}
+QProgressBar::chunk{
+    background-color: blue;
+}
+#error_output{
+    color: rgb(255, 90, 90);
+}

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+  <class>MainView</class>
+  <widget class="QFrame" name="main_widget">
+    <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+        <layout class="QHBoxLayout" name="yandex_units">
+          <item>
+            <widget class="QLabel" name="yandex_units_spent" />
+          </item>
+          <item>
+            <widget class="QLabel" name="yandex_units_remained" />
+          </item>
+          <item>
+            <widget class="QLabel" name="yandex_units_total" />
+          </item>
+        </layout>
+      </item>
+      <item>
+        <widget class="QLabel" name="output" />
+      </item>
+      <item>
+        <widget class="QStackedWidget" name="work_area">
+          <widget class="QPushButton" name="test_button" />
+          <widget class="QProgressBar" name="progress_bar">
+            <property name="value">
+              <number>0</number>
+             </property>
+             <property name="alignment">
+               <set>Qt::AlignCenter</set>
+             </property>
+             <property name="invertedAppearance">
+               <bool>false</bool>
+             </property>
+          </widget>
+        </widget>
+      </item>
+      <item>
+        <widget class="QLabel" name="error_output" />
+      </item>
+    </layout>
+  </widget>
+ </ui>
