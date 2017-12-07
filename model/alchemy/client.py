@@ -68,6 +68,7 @@ class YandexClient(Base):
                 for client in json.load(file)
             ]
             session.bulk_save_objects(data)
+            session.commit()
 
     @classmethod
     def save_json(cls, session):
@@ -85,6 +86,8 @@ class YandexClient(Base):
             }
             for client in session.query(YandexClient).all()
         ]
+        print(cls.file_path)
+        print(data)
         with open(cls.file_path, "w+") as file:
             json.dump(data, file)
 

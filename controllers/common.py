@@ -3,14 +3,17 @@ Module contains resources common to all or many
 controllers 
 classes:
     WithViewMixin - controller with view mixin unifies gui installation 
-    process - pointing where to find .qss and .ui files 
+    process - pointing where to find .qss and .ui files
+    TaskGroupController - controller for some process with progress bar
+functions:
+    clear_items - clears all items from target layout
 """
 
 import os
 from typing import Callable, List, ClassVar
 
 from PyQt5.uic import loadUi
-from PyQt5.QtWidgets import QFrame, QLayout
+from PyQt5.QtWidgets import QFrame, QLayout, QProgressBar
 
 
 class WithViewMixin:
@@ -66,6 +69,11 @@ class WithViewMixin:
         """
         for handler in handlers:
             self.view_handler(handler)
+
+
+class TaskGroupController:
+    def __init__(self, progress_bar: QProgressBar):
+        pass
 
 
 def clear_items(layout: QLayout):

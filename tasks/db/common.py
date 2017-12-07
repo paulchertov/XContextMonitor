@@ -27,6 +27,6 @@ class PQDBTask(QThread):
 
     @property
     def session(self):
-        if not self.session:
+        if not self.__session:
             self.__session = self.__Session()
         return self.__session

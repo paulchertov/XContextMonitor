@@ -29,7 +29,7 @@ class PQClientModel(QObject):
         :param model: YaAPIDirectClient or GoogleAPIAdwordsClient(not implemented yet)
         """
         super().__init__()
-        self.model: Union[YaAPIDirectClient, None] = model
+        self.__model: Union[YaAPIDirectClient, None] = model
 
     @property
     def source(self)->str:
@@ -37,6 +37,15 @@ class PQClientModel(QObject):
             return "Yandex Direct"
         else:
             return ""
+
+    @property
+    def model(self)->Union[YaAPIDirectClient, None]:
+        return self.__model
+
+    @model.setter
+    def model(self, val: Union[YaAPIDirectClient, None]):
+        self.__model = val
+        self.updated.emit()
 
     @property
     def login(self)->str:
