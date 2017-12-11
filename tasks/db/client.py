@@ -37,7 +37,9 @@ class SaveClientsFromAPI(PQDBTask):
     """
     DB Task that updates db with all clients from 
     provided YaAPIDirectClient list
+    :emits got_clients: - list of all YaAPIDirectClient
     """
+    got_clients = pyqtSignal(list)
 
     def __init__(self, clients: List[YaAPIDirectClient]):
         super().__init__()
@@ -49,7 +51,7 @@ class SaveClientsFromAPI(PQDBTask):
                 self.session,
                 self.clients
             )
-            self.finished.emit()
+            self.got_clients.emit(all_clients(self.session))
         except Exception as e:
             self.error_occurred.emit(e)
 
@@ -58,7 +60,7 @@ class LoadClients(PQDBTask):
     """
     DB Task that updates db with all clients, saved to json
     and then gets all clients from db
-    :emits got_clients: - list of YaAPIDirectClient
+    :emits got_clients: - list of all YaAPIDirectClient
     """
     got_clients = pyqtSignal(list)
 
@@ -73,11 +75,14 @@ class LoadClients(PQDBTask):
 class SaveAllClientsToJSON(PQDBTask):
     """
     DB Task that saves all db clients to JSON
+    :emits got_clients: - list of all YaAPIDirectClient
     """
+    got_clients = pyqtSignal(list)
 
     def run(self):
         try:
             YandexClient.save_json(self.session)
+            self.got_clients.emit(all_clients(self.session))
         except Exception as e:
             self.error_occurred.emit(e)
 
@@ -85,7 +90,7 @@ class SaveAllClientsToJSON(PQDBTask):
 class GetClients(PQDBTask):
     """
     DB task that gets all clients from DB 
-    :emits got_clients: - list of YaAPIDirectClient
+    :emits got_clients: - list of all YaAPIDirectClient
     """
     got_clients = pyqtSignal(list)
 

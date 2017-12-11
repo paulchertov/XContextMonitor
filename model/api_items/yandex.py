@@ -25,17 +25,17 @@ class YaAPIDirectClient:
         from_api_answer - create bunch of items from API answer
     """
     def __init__(self, login: str, token: str,
-                 timestamp: datetime, is_active: bool):
+                 timestamp: datetime, set_active: bool):
         """
         :param token: token of Yandex API
         :param login: client login
         :param timestamp: datetime when data was obtained from API
-        :param is_active: is item was set active on the last session in GUI
+        :param set_active: is item was set active on the last session in GUI
         """
         self.token = token
         self.login = login
         self.timestamp = timestamp
-        self.is_active = is_active
+        self.set_active = set_active
 
     @classmethod
     def from_api_answer(cls, token: str, clients: Optional[List])-> List:
@@ -50,7 +50,7 @@ class YaAPIDirectClient:
                 cls(token=token,
                     login=client["Login"],
                     timestamp=datetime.now(),
-                    is_active=False)
+                    set_active=False)
                 for client in clients
             ]
         return []
@@ -67,7 +67,7 @@ class YaAPIDirectClient:
                 login=db_client.login,
                 token=db_client.token,
                 timestamp=db_client.timestamp,
-                is_active=db_client.set_active
+                set_active=db_client.set_active
             )
             for db_client in db_clients
         ]

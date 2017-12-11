@@ -13,7 +13,6 @@ from model.alchemy.ad import YandexAd
 from model.alchemy.links import YandexLink, YandexLinksSet, LinkUrl
 
 
-
 class InitDB(QThread):
     """
     Task that initialises database
