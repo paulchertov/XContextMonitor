@@ -1,0 +1,31 @@
+#clients{
+   border-radius: 10px;
+   padding: 10px;
+}
+#clients QAbstractScrollArea
+{
+    border-radius: 10px;
+    border-style: inset;
+    border-width: 1px;
+}
+#clients QScrollBar::sub-page,#clients QScrollBar::add-page,
+#clients QScrollBar::up-arrow, #clients QScrollBar::down-arrow,
+#clients QScrollBar::sub-line,#clients QScrollBar::add-line
+{
+    border: none;
+}
+#clients QScrollBar::up-arrow, #clients QScrollBar::down-arrow{
+    width: 12px;
+    height: 12px;
+    border-style: outset;
+    border-width: 1px;
+    border-radius: 5px;
+}
+QScrollBar::handle:vertical
+{
+    margin: 20px 0px 20px 0px;
+}
+#clients QScrollBar::handle {
+    border-width: 3px;
+    border-radius: 5px;
+}

@@ -1,3 +1,9 @@
+from PyQt5.QtCore import QObject, pyqtSlot
+
+from controllers.common import WithViewMixin
+from model.gui.client import PQClientModel
+
+
 class PQClientController(QObject, WithViewMixin):
     gui_name = "client"
 

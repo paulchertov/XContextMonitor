@@ -4,6 +4,7 @@ from typing import List
 from PyQt5.QtCore import QObject, pyqtSlot, pyqtSignal
 from PyQt5.QtWidgets import QSpacerItem, QSizePolicy, QInputDialog, QLineEdit
 
+from settings.config import YA_DIRECT_TOKEN
 from controllers.common import WithViewMixin, clear_items
 from controllers.client import PQClientController
 from model.api_items.yandex import YaAPIDirectClient
@@ -16,7 +17,7 @@ from tasks.api.yandex_tasks import GetDirectClients
 class PQClientsController(QObject, WithViewMixin):
     """
     signals:
-        new client (yandex or google)
+        error_occured - something gone wrong, emits Exception
         go_next - all client modifications nave been made, parent need to move
         to another controller
     """
@@ -30,17 +31,70 @@ class PQClientsController(QObject, WithViewMixin):
         self.set_styles()
         self.__model: List[PQClientModel] = []
         self.view.start_button.clicked.connect(self.parse)
-        self.view.add_one_button.clicked.connect(self.add_one)
+        self.view.add_one_button.clicked.connect(self.add_yandex_client)
+        self.view.refresh_button.clicked.connect(self.refresh)
+
+        self.view.setEnabled(False)
+
+        def initiated(clients: List[YaAPIDirectClient]):
+            """
+            Handler that fires after clients was loaded
+            and updates current model with loaded data
+            :param clients: clients loaded from JSON
+            :return: None
+            """
+            self.view.setEnabled(True)
+            self.model = clients
+
+        task = LoadClients()
+        task.got_clients.connect(initiated)
+        task.error_occurred.connect(self.error_occurred)
+        task.run()
+
+    @pyqtSlot()
+    def refresh(self):
+        """
+        Refresh button handler. 
+        :return: None
+        """
+
+        def saved_clients_to_db(clients):
+            """
+            Handler that fires after clients was saved
+            to db and updates model with actual clients
+            :param clients: clients loaded from JSON
+            :return: None
+            """
+            self.view.setEnabled(True)
+            self.model = clients
+
+        def got_clients_from_api(clients):
+            """
+            Handler that fires after clients was loaded
+            and updates db with result 
+            :param clients: clients loaded from JSON
+            :return: None
+            """
+            task = SaveClientsFromAPI(clients)
+            task.got_clients.connect(saved_clients_to_db)
+            task.error_occurred.connect(self.error_occurred)
+            task.run()
+
+        self.view.setEnabled(False)
+        task = GetDirectClients(YA_DIRECT_TOKEN)
+        task.got_clients.connect(got_clients_from_api)
+        task.error_occurred.connect(self.error_occurred)
+        task.run()
 
     @pyqtSlot()
     def parse(self):
         """
-        Finish client edit and move to next view
+        Start button handler. Finish clients edit and move to next view
         :return: None
         """
         task = SaveAllClientsToJSON()
         task.finished.connect(self.go_next)
-        task.error_occurred.connect(self.error)
+        task.error_occurred.connect(self.error_occurred)
         task.run()
 
     @pyqtSlot()
@@ -81,12 +135,12 @@ class PQClientsController(QObject, WithViewMixin):
             YaAPIDirectClient(
                 login=login,
                 token=token,
-                is_active=True,
+                set_active=True,
                 timestamp=datetime.datetime.now()
             )
         )
         task.got_clients.connect(added_client)
-        task.error_occurred.connect(self.error)
+        task.error_occurred.connect(self.error_occurred)
         task.run()
 
     @pyqtSlot()
@@ -97,10 +151,10 @@ class PQClientsController(QObject, WithViewMixin):
         """
         clear_items(self.view.items_layout)
         for client in self.__model:
-            view = PQClientController(client).view
-            view.model.updated.connect(self.redraw)
-            self.view.items_layout.addWidget(view)
-            self.view.scroll_area.ensureWidgetVisible(view)
+            client = PQClientController(client)
+            client.model.updated.connect(self.redraw)
+            self.view.items_layout.addWidget(client.view)
+            self.view.scroll_area.ensureWidgetVisible(client.view)
         self.view.items_layout.addItem(  # adding spacer for correct alignment
             QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
         )

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+  <class>ClientView</class>
+  <widget class="QFrame" name="client">
+    <layout class="QGridLayout" name="gridLayout">
+      <item row="0" column="0">
+        <widget class="QLabel" name="login_label">
+          <property name="text">
+            <string>Логин</string>
+          </property>
+        </widget>
+      </item>
+      <item row="0" column="1">
+        <widget class="QLabel" name="updated_label">
+          <property name="text">
+            <string>Обновлен</string>
+          </property>
+        </widget>
+      </item>
+      <item row="0" column="2">
+        <widget class="QLabel" name="source">
+          <property name="text">
+            <string>Yandex Direct</string>
+          </property>
+        </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="login">
+        <property name="text">
+         <string>example@ya.ru</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+        <widget class="QLabel" name="updated">
+          <property name="text">
+            <string>01/01/1990 0:00</string>
+          </property>
+        </widget>
+      </item>
+      <item row="1" column="2">
+        <widget class="QCheckBox" name="set_active">
+          <property name="text">
+            <string>использовать</string>
+          </property>
+        </widget>
+      </item>
+    </layout>
+  </widget>
+</ui>
