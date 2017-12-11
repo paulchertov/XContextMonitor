@@ -22,7 +22,7 @@ class PQClientModel(QObject):
     signals:
         updated: emitted when any field was updated
     """
-    updated = pyqtSignal()
+    updated = pyqtSignal(object)
 
     def __init__(self, model: Union[YaAPIDirectClient, None]):
         """
@@ -45,7 +45,7 @@ class PQClientModel(QObject):
     @model.setter
     def model(self, val: Union[YaAPIDirectClient, None]):
         self.__model = val
-        self.updated.emit()
+        self.updated.emit(self)
 
     @property
     def login(self)->str:
@@ -54,7 +54,7 @@ class PQClientModel(QObject):
     @login.setter
     def login(self, val: str):
         self.model.login = val
-        self.updated.emit()
+        self.updated.emit(self)
 
     @property
     def timestamp(self)->datetime:
@@ -63,13 +63,13 @@ class PQClientModel(QObject):
     @timestamp.setter
     def timestamp(self, val: datetime):
         self.model.timestamp = val
-        self.updated.emit()
+        self.updated.emit(self)
 
     @property
-    def is_active(self)->bool:
-        return self.model.is_active
+    def set_active(self)->bool:
+        return self.model.set_active
 
-    @is_active.setter
-    def is_active(self, val: bool):
-        self.model.is_active = val
-        self.updated.emit()
+    @set_active.setter
+    def set_active(self, val: bool):
+        self.model.set_active = val
+        self.updated.emit(self)

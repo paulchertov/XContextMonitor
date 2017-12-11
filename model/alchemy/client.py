@@ -103,19 +103,12 @@ class YandexClient(Base):
         persisted_clients_logins = {
             login[0] for login in session.query(YandexClient.login).all()
         }
-        print("persisted_clients_logins")
-        print(persisted_clients_logins)
 
         api_clients_logins = {
             client.login for client in clients
         }
-        print("api_clients_logins")
-        print(api_clients_logins)
-
         logins_to_add = api_clients_logins - persisted_clients_logins
-        print("logins_to_add")
-        print(logins_to_add)
-
+        
         for client in clients:
             if client.login in logins_to_add:
                 session.add(
