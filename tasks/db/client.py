@@ -19,6 +19,7 @@ from PyQt5.QtCore import pyqtSignal
 
 from model.alchemy.client import YandexClient
 from model.api_items.yandex import YaAPIDirectClient
+from model.gui.client import PQClientModel
 from tasks.db.common import PQDBTask
 
 
@@ -119,6 +120,30 @@ class AddClient(PQDBTask):
     def run(self):
         try:
             YandexClient.add_single(self.session, self.client)
+            self.got_clients.emit(all_clients(self.session))
+        except Exception as e:
+            self.error_occurred.emit(e)
+
+
+class UpdateClientsFromGUI(PQDBTask):
+    """
+    DB task that updates model after changes made in GUI
+    """
+    got_clients = pyqtSignal(list)
+
+    def __init__(self, clients: List[PQClientModel]):
+        """
+        :param clients: list of PQClientModel 
+        """
+        super().__init__()
+        self.clients = clients
+
+    def run(self):
+        try:
+            ya_clients = [
+                x.model for x in self.clients if x.source == "yandex"
+            ]
+            YandexClient.update_from_gui(self.session, ya_clients)
             self.got_clients.emit(all_clients(self.session))
         except Exception as e:
             self.error_occurred.emit(e)

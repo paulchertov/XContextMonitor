@@ -86,8 +86,6 @@ class YandexClient(Base):
             }
             for client in session.query(YandexClient).all()
         ]
-        print(cls.file_path)
-        print(data)
         with open(cls.file_path, "w+") as file:
             json.dump(data, file)
 
@@ -118,6 +116,20 @@ class YandexClient(Base):
                 session.query(YandexClient) \
                     .get(client.login) \
                     .timestamp = datetime.now()
+        session.commit()
+
+    @classmethod
+    def update_from_gui(cls, session, clients: List):
+        """
+        Updates DB to match provided GUI state
+        :param session: SQLAlchemy session
+        :param clients: list of YaAPIDirectClient
+        :return: None
+        """
+        for client in clients:
+            db_client = session.query(YandexClient) \
+                .get(client.login)
+            db_client.set_active = client.set_active
         session.commit()
 
     @classmethod
