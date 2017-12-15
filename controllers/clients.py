@@ -79,7 +79,6 @@ class PQClientsController(QObject, WithViewMixin):
             task.got_clients.connect(saved_clients_to_db)
             task.error_occurred.connect(self.error_occurred)
             task.run()
-
         self.view.setEnabled(False)
         task = GetDirectClients(YA_DIRECT_TOKEN)
         task.got_clients.connect(got_clients_from_api)
@@ -92,10 +91,13 @@ class PQClientsController(QObject, WithViewMixin):
         Start button handler. Finish clients edit and move to next view
         :return: None
         """
-        task = SaveAllClientsToJSON()
-        task.finished.connect(self.go_next)
-        task.error_occurred.connect(self.error_occurred)
-        task.run()
+        def to_json():
+            task = SaveAllClientsToJSON()
+            task.finished.connect(self.go_next)
+            task.error_occurred.connect(self.error_occurred)
+            task.run()
+
+        task = UpdateClientsFromGUI()
 
     @pyqtSlot()
     def add_yandex_client(self):
