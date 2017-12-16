@@ -10,7 +10,7 @@ from controllers.client import PQClientController
 from model.api_items.yandex import YaAPIDirectClient
 from model.gui.client import PQClientModel
 from tasks.db.client import AddClient, SaveAllClientsToJSON, SaveClientsFromAPI,\
-    LoadClients, GetClients
+    LoadClients, UpdateClientsFromGUI
 from tasks.api.yandex_tasks import GetDirectClients
 
 
@@ -97,7 +97,10 @@ class PQClientsController(QObject, WithViewMixin):
             task.error_occurred.connect(self.error_occurred)
             task.run()
 
-        task = UpdateClientsFromGUI()
+        task = UpdateClientsFromGUI(self.__model)
+        task.got_clients.connect(to_json)
+        task.error_occurred.connect(self.error_occurred)
+        task.run()
 
     @pyqtSlot()
     def add_yandex_client(self):
