@@ -91,9 +91,14 @@ class PQClientsController(QObject, WithViewMixin):
         Start button handler. Finish clients edit and move to next view
         :return: None
         """
-        def to_json():
+        def to_json(clients):
+            """
+            Handler that fires after clients was saved to db
+            and saves clients to json
+            :return: None
+            """
             task = SaveAllClientsToJSON()
-            task.finished.connect(self.go_next)
+            task.got_clients.connect(self.go_next)
             task.error_occurred.connect(self.error_occurred)
             task.run()
 

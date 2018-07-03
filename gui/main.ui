@@ -20,19 +20,7 @@
         <widget class="QLabel" name="output" />
       </item>
       <item>
-        <widget class="QStackedWidget" name="work_area">
-          <widget class="QProgressBar" name="progress_bar">
-            <property name="value">
-              <number>0</number>
-             </property>
-             <property name="alignment">
-               <set>Qt::AlignCenter</set>
-             </property>
-             <property name="invertedAppearance">
-               <bool>false</bool>
-             </property>
-          </widget>
-        </widget>
+        <widget class="QStackedWidget" name="work_area" />
       </item>
       <item>
         <widget class="QLabel" name="error_output" />

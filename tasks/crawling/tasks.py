@@ -21,6 +21,7 @@ class CheckUrls(QThread):
         warnings - all warnings as single string
     """
     got_url = pyqtSignal(str, str, str)
+    error_occurred = pyqtSignal(Exception)
 
     def __init__(self, pages_by_login: Dict[str, List[str]]):
         """
@@ -29,6 +30,7 @@ class CheckUrls(QThread):
             values - lists of urls belonging to one client
         """
         super().__init__()
+        print(pages_by_login)
         self.crawlers = [
             iter(SiteCrawler(self, pages))
             for login, pages in pages_by_login.items()

@@ -107,3 +107,4 @@ ENV/
 
 settings/config.py
 settings/clients.json
+db.db

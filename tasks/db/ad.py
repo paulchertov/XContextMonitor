@@ -37,9 +37,6 @@ class SaveAdsFromAPI(PQDBTask):
             YandexLinksSet.update_from_api(
                 self.session, self.ads
             )
-            YandexLink.update_from_api(
-                self.session, self.ads
-            )
             YandexAd.update_from_api(
                 self.session,
                 self.ads

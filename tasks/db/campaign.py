@@ -27,7 +27,7 @@ class SaveCampaignsFromAPI(PQDBTask):
         try:
             YandexCampaign.update_from_api(
                 self.session,
-                self.clients
+                self.campaigns
             )
         except Exception as e:
             self.error_occurred.emit(e)

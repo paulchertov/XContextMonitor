@@ -19,4 +19,4 @@ from sqlalchemy.ext.declarative import declarative_base
 Base = declarative_base()
 LoginTokenPair = Tuple[str, str]
 
-engine = create_engine('sqlite:///:memory:', echo=False)
+engine = create_engine('sqlite:///db.db', echo=False)

@@ -8,5 +8,5 @@ from collections import namedtuple
 
 ParsedLink = namedtuple(
     "ParsedLink",
-    "status url login campaign group ad comment"
+    "status url login campaign group ad comment kind"
 )

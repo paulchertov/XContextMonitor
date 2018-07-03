@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+  <class>TaskChainView</class>
+  <widget class="QFrame" name="task_chain">
+    <layout class="QHBoxLayout" name="task_chain_layout">
+      <item>
+		<widget class="QProgressBar" name="progress_bar">
+		  <property name="value">
+			<number>0</number>
+		  </property>
+		  <property name="alignment">
+			<set>Qt::AlignCenter</set>
+		  </property>
+		  <property name="invertedAppearance">
+			<bool>false</bool>
+		  </property>
+		</widget>
+	  </item>
+	</layout>
+  </widget>
+</ui>

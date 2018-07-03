@@ -6,12 +6,14 @@ Classes:
     YandexLink -  model for link from link set from Yandex API
     LinkUrl - model for link checked by crawler
 """
-from typing import List, Dict
+from typing import Tuple, List, Dict
 
 from sqlalchemy import Column, Integer, String, ForeignKey, Sequence
 from sqlalchemy.orm import relationship
 
+from settings.config import YA_DIRECT_TOKEN
 from model.alchemy.common import Base
+from model.alchemy.client import YandexClient
 from model.alchemy.campaign import YandexCampaign
 from model.alchemy.ad_group import YandexAdGroup
 from model.alchemy.ad import YandexAd
@@ -28,6 +30,34 @@ class YandexLinksSet(Base):
     id = Column(Integer, primary_key=True)
     ads = relationship("YandexAd", backref="links_set")
     links = relationship("YandexLink", backref="links_set")
+
+    @classmethod
+    def by_login_token(cls, session)->Dict[Tuple[str, str], List[str]]:
+        """
+        Return all link sets grouped by client login
+        :param session: SQLAlchemy session
+        :return: None
+        """
+        sets = session \
+            .query(
+                YandexLinksSet.id,
+                YandexClient.login,
+                YandexClient.token
+            ) \
+            .join(YandexAd) \
+            .join(YandexAdGroup) \
+            .join(YandexCampaign) \
+            .join(YandexClient)
+
+        sets_by_login_token = {}
+        for set_id, login, token in sets:
+            key = (login, token or YA_DIRECT_TOKEN)
+            if key in sets_by_login_token:
+                sets_by_login_token[key].append(set_id)
+            else:
+                sets_by_login_token[key] = [set_id]
+
+        return sets_by_login_token
 
     @classmethod
     def update_from_api(cls, session, ads: List):
@@ -98,20 +128,44 @@ class LinkUrl(Base):
     warning_text = Column(String)
 
     @classmethod
-    def by_logins(cls, session)->Dict[str, List[str]]:
+    def from_response(cls, session, url: str, status: str, warning: str):
+        """
+        Creates single entity from provided data
+        :param session: SQLAlchemy session
+        :param url: url of parsed page
+        :param status: status code of page
+        :param warning: warning text to be displayed
+        :return: None
+        """
+        session.add(
+            LinkUrl(url=url, status=status, warning_text=warning)
+        )
+        session.commit()
+
+    @classmethod
+    def by_login(cls, session)->Dict[Tuple[str, str], List[str]]:
         """
         Return all possible links grouped by client login
         :param session: SQLAlchemy session
         :return: dictionary with 
-            keys - logins
+            keys - login: token pair
             values - lists of links
         """
         main_links_query = session \
-            .query(YandexAd.url, YandexCampaign.client_login) \
+            .query(
+                YandexAd.url,
+                YandexCampaign.client_login,
+                YandexClient.token
+            ) \
             .join(YandexAdGroup) \
-            .join(YandexCampaign)
+            .join(YandexCampaign) \
+            .join(YandexClient)
         additional_links_query = session \
-            .query(YandexLink.url, YandexCampaign.client_login) \
+            .query(
+                YandexLink.url,
+                YandexCampaign.client_login,
+                YandexClient.token
+            ) \
             .join(YandexLinksSet) \
             .join(YandexAd) \
             .join(YandexAdGroup) \
@@ -120,8 +174,8 @@ class LinkUrl(Base):
         links_by_logins = {}
         all_links = []
 
-        for link, login in links_query.all():
-            if not link in all_links:
+        for link, login, token in links_query.all():
+            if link is not None and link not in all_links:
                 all_links.append(link)
                 if login in links_by_logins:
                     links_by_logins[login].append(link)
@@ -130,11 +184,12 @@ class LinkUrl(Base):
         return links_by_logins
 
     @classmethod
-    def aggregate_links(cls, session, criteria)-> List[ParsedLink]:
+    def aggregate_links(cls, session, criteria, kind: str)-> List[ParsedLink]:
         """
         Gets all links by some criteria
         :param session: SQLAlchemy session
         :param criteria: SQLAlchemy criteria for query
+        :param kind: type of produced GUI model
         :return: List of ParsedLink item (both from additional links
         and ads main links matching provided criteria
         """
@@ -183,7 +238,8 @@ class LinkUrl(Base):
                     campaign=campaign,
                     group=group,
                     ad=ad,
-                    comment=comment
+                    comment=comment,
+					kind=kind
             )
             for status, url, login, campaign, group, ad, comment in wrong_urls.all()
         ]

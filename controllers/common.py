@@ -71,11 +71,6 @@ class WithViewMixin:
             self.view_handler(handler)
 
 
-class TaskGroupController:
-    def __init__(self, progress_bar: QProgressBar):
-        pass
-
-
 def clear_items(layout: QLayout):
     """
     Clears all widgets from layout

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+  <class>ResultView</class>
+  <widget class="QWidget" name="gridLayoutWidget">
+    <layout class="QGridLayout" name="gridLayout">
+      <item row="0" column="0" colspan="2">
+        <widget class="QLabel" name="wrong_elements">
+          <property name="text">
+            <string>Элементов с ошибками: 0</string>
+          </property>
+          <property name="alignment">
+            <set>Qt::AlignCenter</set>
+          </property>
+        </widget>
+      </item>
+      <item row="1" column="0" colspan="2">
+        <widget class="QLabel" name="warnings_elements">
+          <property name="text">
+            <string>Элементов с предупреждениями: 0</string>
+          </property>
+          <property name="alignment">
+            <set>Qt::AlignCenter</set>
+          </property>
+        </widget>
+      </item>
+      <item row="2" column="0">
+        <widget class="QPushButton" name="suspend_button">
+          <property name="text">
+            <string>Остановить</string>
+          </property>
+        </widget>
+      </item>
+      <item row="2" column="1">
+        <widget class="QPushButton" name="download_button">
+          <property name="text">
+            <string>Выгрузить</string>
+          </property>
+        </widget>
+      </item>
+    </layout>
+  </widget>
+</ui>

@@ -141,7 +141,7 @@ class UpdateClientsFromGUI(PQDBTask):
     def run(self):
         try:
             ya_clients = [
-                x.model for x in self.clients if x.source == "yandex"
+                x.model for x in self.clients if x.source == "Yandex Direct"
             ]
             YandexClient.update_from_gui(self.session, ya_clients)
             self.got_clients.emit(all_clients(self.session))

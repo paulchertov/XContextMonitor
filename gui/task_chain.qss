@@ -1,0 +1,8 @@
+#task_chain QProgressBar{
+    border: 2px inset;
+    max-height: 50px;
+    margin: 100px auto 100px auto;
+}
+#task_chain QProgressBar::chunk{
+    background-color: blue;
+}
